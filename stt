@@ -1,0 +1,69 @@
+!sudo apt install libasound2-dev portaudio19-dev libportaudio2 libportaudiocpp0 ffmpeg
+!pip install pyaudio
+!pip install gtts SpeechRecognition pydub
+!apt-get install ffmpeg
+from gtts import gTTS
+import speech_recognition as sr
+import os
+from IPython.display import Audio, display
+from pydub import AudioSegment
+from pydub.playback import play
+
+# Function to convert text to speech
+def text_to_speech(text, filename='output.mp3'):
+    tts = gTTS(text=text, lang='en')
+    tts.save(filename)
+    sound = AudioSegment.from_mp3(filename)
+    play(sound)
+    return filename
+
+# Function to convert speech to text
+def speech_to_text():
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Listening...")
+        audio = recognizer.listen(source)
+        print("Processing...")
+
+    try:
+        text = recognizer.recognize_google(audio)
+        print("You said: " + text)
+        return text
+    except sr.UnknownValueError:
+        print("Google Speech Recognition could not understand the audio")
+    except sr.RequestError as e:
+        print("Could not request results from Google Speech Recognition service; {0}".format(e))
+        return None
+
+# Function to play audio in Colab
+def play_audio(filename):
+    display(Audio(filename, autoplay=True))
+import speech_recognition as sr
+from pydub import AudioSegment
+
+# Function to convert speech to text from an audio file
+def speech_to_text_from_file(file_path):
+    recognizer = sr.Recognizer()
+    
+    # Convert mp3 file to wav format
+    audio = AudioSegment.from_mp3(file_path)
+    audio.export("temp.wav", format="wav")
+    
+    with sr.AudioFile("temp.wav") as source:
+        audio_data = recognizer.record(source)
+        
+    try:
+        text = recognizer.recognize_google(audio_data)
+        print("You said: " + text)
+        return text
+    except sr.UnknownValueError:
+        print("Google Speech Recognition could not understand the audio")
+    except sr.RequestError as e:
+        print("Could not request results from Google Speech Recognition service; {0}".format(e))
+        return None
+
+if __name__ == "__main__":
+    file_path = "**data path**"
+    recognized_text = speech_to_text_from_file(file_path)
+    if recognized_text:
+        print("Transcription: " + recognized_text)
